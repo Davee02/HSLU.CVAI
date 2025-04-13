@@ -16,6 +16,25 @@ mp_drawing = mp.solutions.drawing_utils
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M','J','P','G'))
 
+def count_fingers_up(hand_landmarks):
+    """Zählt die ausgestreckten Finger"""
+    tips = [8, 12, 16, 20]  # Fingerspitzen (außer Daumen)
+    middle_joints = [6, 10, 14, 18]  # Mittlere Fingergelenke
+    count = 0
+    
+    # Daumen separat prüfen (horizontale Position)
+    thumb_tip = hand_landmarks.landmark[4]
+    thumb_base = hand_landmarks.landmark[2]
+    if thumb_tip.x < thumb_base.x:  # Bei rechter Hand
+        count += 1
+    
+    # Andere Finger prüfen (vertikale Position)
+    for tip, mid in zip(tips, middle_joints):
+        if hand_landmarks.landmark[tip].y < hand_landmarks.landmark[mid].y:
+            count += 1
+            
+    return count
+
 while cap.isOpened():
     success, image = cap.read()
     if not success:
@@ -38,6 +57,16 @@ while cap.isOpened():
                 hand_landmarks, 
                 mp_hands.HAND_CONNECTIONS
             )
+
+            # Finger zählen
+            finger_count = count_fingers_up(hand_landmarks)
+            # Zähler auf dem Bild anzeigen
+            cv2.putText(image, str(finger_count), (10, 30), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            # Hand-Label hinzufügen
+            hand_label = "Hand 1" if results.multi_hand_landmarks.index(hand_landmarks) == 0 else "Hand 2"
+            cv2.putText(image, hand_label, (10, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     
     # Bild anzeigen
     cv2.imshow('Handgestenerkennung', image)
