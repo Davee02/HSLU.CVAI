@@ -1,22 +1,30 @@
 import socket
-import time
-
-def send_command(command, host, port):
-    try:
-        # Create a socket connection
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((host, port))
+    
+class SocketClient:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.client = None
         
-        # Send the command
-        client.send(command.encode('utf8'))
-        
-        # Close the connection
-        client.close()
-        
-        # Small delay to prevent command flooding
-        time.sleep(0.1)
-        
-        return True
-    except Exception as e:
-        print(f"Error sending command: {e}")
-        return False
+    def connect(self):
+        try:
+            # Create a socket connection
+            self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.client.connect((self.host, self.port))
+            print(f"Connected to {self.host}:{self.port}")
+        except Exception as e:
+            print(f"Error connecting to server: {e}")
+    
+    def send(self, command):
+        if self.client:
+            try:
+                # Send the command
+                self.client.send(command.encode('utf8'))
+                print(f"Sent command: {command}")
+            except Exception as e:
+                print(f"Error sending command: {e}")
+    
+    def close(self):
+        if self.client:
+            self.client.close()
+            print("Connection closed")
