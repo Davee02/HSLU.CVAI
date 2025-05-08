@@ -15,9 +15,9 @@ def main():
     
     # Get initial frame to determine dimensions
     ret, frame = cap.read()
-    if not ret:
+    while not ret:
+        ret, frame = cap.read()
         print("Failed to access webcam")
-        return
     
     # Frame dimensions
     frame_h, frame_w = frame.shape[:2]
