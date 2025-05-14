@@ -3,10 +3,11 @@ import mediapipe as mp
 import torch
 import time
 import argparse
+import ultraimport
 
 from utils import setup_mediapipe_hands, calc_landmark_list, pre_process_landmark, setup_video_capture
 from models import GestureClassifier
-from socket_utils import SocketClient
+socket_utils = ultraimport("__dir__/../socket_utils.py")
 
 class GestureActionController:
     def __init__(self, socket_client, consecutive_frames=10, cooldown_period=2.0):
@@ -226,7 +227,7 @@ def run_classifier(model_path, input_size=42, num_classes=6, server_host="Davids
     print(f"Model loaded. Using device: {device}")
     
     # Setup socket client
-    socket_client = SocketClient(server_host, server_port)
+    socket_client = socket_utils.SocketClient(server_host, server_port)
     socket_client.connect()
     
     # Setup gesture controller
